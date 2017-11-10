@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var session = require('express-session')
 
 var extend = require('util')._extend,
     fs = require('fs'),
@@ -71,9 +70,72 @@ router.use(function (req, res, next) {
 
   var requestId = req.query.requestId;
 
-  
+  getServices(function (error) {
+    // if (error) {
+    //   res.status(500).send(error);
+    //   return;
+    // }
 
-  next();
+    // var service = getService(requestId);
+
+    // if (!service){
+    //   res.status(404).send("Service not found");
+    //   return;
+    // }
+
+    var viewData = {};
+    viewData.formData = "";
+    viewData.formQuery = "?";
+    viewData.formHash = {};
+
+    for (var name in req.query){
+      var value = req.query[name];
+
+      if (typeof value == "object") {
+        for (var i in value) {
+          viewData.formData += '<input type="hidden" name="'+name+'['+i+']" value="' + value[i] + '">\n';
+          viewData.formQuery += name + '['+i+']' + "=" + value[i] + "&";
+        }
+      } else {
+        viewData.formData += '<input type="hidden" name="'+name+'" value="' + value + '">\n';
+        viewData.formQuery += name + "=" + value + "&";
+      }
+
+      viewData.formHash[name] = value;
+    }
+
+    if (viewData.formQuery.length>1){
+      viewData.formQuery = viewData.formQuery.slice(0,-1);
+    }
+
+    viewData.requestId = requestId;
+    viewData.request = request;
+    viewData.idpRoot = idpRoot;
+    viewData.serviceName = service.name;
+    viewData.serviceLOA = 1;
+    viewData.serviceAcceptsLOA1 = true;
+    viewData.userLOAis2 = (req.query.userLOA == "2");
+    viewData.serviceNameLower = "name";
+    viewData.serviceProvider = "provider";
+    viewData.serviceOtherWays = "other ways";
+    viewData.servicewhyVerifysUsed = "why is verify used";
+    viewData.serviceStartURL = ""
+    viewData.serviceCompleteURL = requestId;
+
+    viewData.query = req.query;
+
+
+    if (req.query.idp){
+      viewData.idp = getIDPBySlug(req.query.idp);
+    }
+
+    var serviceLOA = viewData.serviceLOA
+
+    extend(res.locals, viewData);
+
+    next();
+
+  });
 });
 
 router.get('/', function (req, res) {
@@ -371,16 +433,16 @@ router.get('/third-cycle-matching', function (req, res) {
 router.get('/wait-for-match', function (req, res) {
   var viewData = {};
 
-  // var service = getService(res.locals.requestId);
+  var service = getService(res.locals.requestId);
 
-  viewData.serviceCompleteURL = res.locals.requestId;
+  viewData.serviceCompleteURL = service.urls.end;
 
-  // if (req.query.third_cycle == "false"){
-  //   res.redirect("fail-third-cycle" + res.locals.formQuery)
-  // } else {
+  if (req.query.third_cycle == "false"){
+    res.redirect("fail-third-cycle" + res.locals.formQuery)
+  } else {
 
   res.render('wait-for-match', viewData);
-// }
+}
 });
 
 router.get('/uplift-warning', function (req, res) {
