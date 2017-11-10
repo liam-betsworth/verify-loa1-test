@@ -433,9 +433,9 @@ router.get('/third-cycle-matching', function (req, res) {
 router.get('/wait-for-match', function (req, res) {
   var viewData = {};
 
-  var service = getService(res.locals.requestId);
+  // var service = getService(res.locals.requestId);
 
-  viewData.serviceCompleteURL = service.urls.end;
+  viewData.serviceCompleteURL = res.locals.requestId;
 
   if (req.query.third_cycle == "false"){
     res.redirect("fail-third-cycle" + res.locals.formQuery)
