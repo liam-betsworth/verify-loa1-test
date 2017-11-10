@@ -111,7 +111,7 @@ router.use(function (req, res, next) {
     viewData.requestId = requestId;
     viewData.request = request;
     viewData.idpRoot = idpRoot;
-    viewData.serviceName = service.name;
+    viewData.serviceName = "name";
     viewData.serviceLOA = 1;
     viewData.serviceAcceptsLOA1 = true;
     viewData.userLOAis2 = (req.query.userLOA == "2");
