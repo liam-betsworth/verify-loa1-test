@@ -116,7 +116,7 @@ router.use(function (req, res, next) {
     viewData.serviceAcceptsLOA1 = true;
     viewData.userLOAis2 = (req.query.userLOA == "2");
     viewData.serviceNameLower = "name";
-    viewData.serviceProvider = "provider";
+    viewData.serviceProvider = "DVLA";
     viewData.serviceOtherWays = "other ways";
     viewData.servicewhyVerifysUsed = "why is verify used";
     viewData.serviceStartURL = ""
