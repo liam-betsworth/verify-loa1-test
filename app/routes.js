@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var session = require('express-session')
 
 var extend = require('util')._extend,
     fs = require('fs'),
@@ -68,74 +69,11 @@ router.use(function (req, res, next) {
   // send common data to every view:
   // service, IDP root
 
-  var requestId = req.query.requestId || "dvla";
+  var requestId = req.query.requestId;
 
-  getServices(function (error) {
-    if (error) {
-      res.status(500).send(error);
-      return;
-    }
+  
 
-    var service = getService(requestId);
-
-    if (!service){
-      res.status(404).send("Service not found");
-      return;
-    }
-
-    var viewData = {};
-    viewData.formData = "";
-    viewData.formQuery = "?";
-    viewData.formHash = {};
-
-    for (var name in req.query){
-      var value = req.query[name];
-
-      if (typeof value == "object") {
-        for (var i in value) {
-          viewData.formData += '<input type="hidden" name="'+name+'['+i+']" value="' + value[i] + '">\n';
-          viewData.formQuery += name + '['+i+']' + "=" + value[i] + "&";
-        }
-      } else {
-        viewData.formData += '<input type="hidden" name="'+name+'" value="' + value + '">\n';
-        viewData.formQuery += name + "=" + value + "&";
-      }
-
-      viewData.formHash[name] = value;
-    }
-
-    if (viewData.formQuery.length>1){
-      viewData.formQuery = viewData.formQuery.slice(0,-1);
-    }
-
-    viewData.requestId = requestId;
-    viewData.request = request;
-    viewData.idpRoot = idpRoot;
-    viewData.serviceName = service.name;
-    viewData.serviceLOA = service.LOA;
-    viewData.serviceAcceptsLOA1 = (service.LOA == "2,1");
-    viewData.userLOAis2 = (req.query.userLOA == "2");
-    viewData.serviceNameLower = service.name[0].toLowerCase() + service.name.substring(1);
-    viewData.serviceProvider = service.provider;
-    viewData.serviceOtherWays = (service.otherWays) ? marked(service.otherWays) : "";
-    viewData.servicewhyVerifysUsed = service.whyVerifysUsed;
-    viewData.serviceStartURL = service.urls.start
-    viewData.serviceCompleteURL = service.urls.end
-
-    viewData.query = req.query;
-
-
-    if (req.query.idp){
-      viewData.idp = getIDPBySlug(req.query.idp);
-    }
-
-    var serviceLOA = viewData.serviceLOA
-
-    extend(res.locals, viewData);
-
-    next();
-
-  });
+  next();
 });
 
 router.get('/', function (req, res) {
@@ -433,16 +371,16 @@ router.get('/third-cycle-matching', function (req, res) {
 router.get('/wait-for-match', function (req, res) {
   var viewData = {};
 
-  var service = getService(res.locals.requestId);
+  // var service = getService(res.locals.requestId);
 
-  viewData.serviceCompleteURL = service.urls.end;
+  viewData.serviceCompleteURL = res.locals.requestId;
 
-  if (req.query.third_cycle == "false"){
-    res.redirect("fail-third-cycle" + res.locals.formQuery)
-  } else {
+  // if (req.query.third_cycle == "false"){
+  //   res.redirect("fail-third-cycle" + res.locals.formQuery)
+  // } else {
 
   res.render('wait-for-match', viewData);
-}
+// }
 });
 
 router.get('/uplift-warning', function (req, res) {
