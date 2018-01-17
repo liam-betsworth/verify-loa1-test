@@ -29,6 +29,13 @@ if (env === 'production' && useAuth === 'true'){
     app.use(utils.basicAuth(username, password));
 }
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // Application settings
 app.set('view engine', 'html');
 app.set('views', [__dirname + '/app/views', __dirname + '/lib/']);
@@ -77,13 +84,6 @@ if (env === 'production' && useHttps === 'true'){
 app.use(function (req, res, next) {
   // Setting headers stops pages being indexed even if indexed pages link to them.
   res.setHeader('X-Robots-Tag', 'noindex');
-  next();
-});
-
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
   next();
 });
 
