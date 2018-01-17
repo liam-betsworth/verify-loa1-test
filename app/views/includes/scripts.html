@@ -12,3 +12,10 @@
 <script src="/public/javascripts/passport_expiry.js"></script>
 
 <script src="/public/javascripts/application.js"></script>
+
+<script>
+  console.log('Verify IDP - Sending wake signal');
+  $.get("https://verify-prototype-idp.herokuapp.com/barclays/sign-in", function( data ) {
+    console.log('Verify IDP - Received signal');
+  });
+</script>
